@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Pomoz</string>
+    <string name="witaj">Witaj, </string>
+    <string name="placeholder">placeholder</string>
+    <string name="honorChipText">Żetony Honoru w tym miesiącu</string>
+    <string name="tasks">zadania</string>
+    <string name="_0">0</string>
+    <string name="persons">Osoby</string>
+</resources>
