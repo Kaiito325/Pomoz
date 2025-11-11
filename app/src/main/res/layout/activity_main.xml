@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.MainActivity"
-    android:paddingTop="24dp">
+    android:paddingTop="24dp"
+    android:paddingBottom="8dp">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"

@@ -6,4 +6,8 @@
     <string name="tasks">zadania</string>
     <string name="_0">0</string>
     <string name="persons">Osoby</string>
+    <string name="task">zadanie</string>
+    <string name="description">opis</string>
+    <string name="location">lokalizacja</string>
+    <string name="available_tasks">Dostępne zadania</string>
 </resources>

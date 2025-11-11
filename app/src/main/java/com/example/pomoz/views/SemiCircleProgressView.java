@@ -2,6 +2,7 @@ package com.example.pomoz.views;
 
 import android.content.Context;
 import android.graphics.*;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -16,6 +17,9 @@ public class SemiCircleProgressView extends View {
     private Paint glowPaint;
     private Paint textPaint;
     private Paint textGlowPaint;
+    private Drawable tokenDrawable;
+    private int tokenSize = 60; // wielkość żetonu w px
+
 
     private final RectF arcRect = new RectF();
 
@@ -49,13 +53,13 @@ public class SemiCircleProgressView extends View {
         // tekst zwykły (opcjonalnie czarny kontrast)
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setColor(Color.DKGRAY);
-        textPaint.setTextSize(70f);
+        textPaint.setTextSize(60f);
         textPaint.setTextAlign(Paint.Align.CENTER);
 
         // neonowy glow dla tekstu
         textGlowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textGlowPaint.setColor(Color.GREEN);
-        textGlowPaint.setTextSize(70f);
+        textGlowPaint.setTextSize(60f);
         textGlowPaint.setTextAlign(Paint.Align.CENTER);
         textGlowPaint.setStyle(Paint.Style.FILL);
         textGlowPaint.setMaskFilter(new BlurMaskFilter(15, BlurMaskFilter.Blur.NORMAL));
@@ -84,7 +88,23 @@ public class SemiCircleProgressView extends View {
         canvas.drawArc(arcRect, 180f, sweepAngle, false, progressPaint);
 
         // tekst neonowy
-        String stepText = currentStep + "/" + maxStep + " H";
+        String stepText = currentStep + "/" + maxStep;
+        if (tokenDrawable != null) {
+            float textWidth = textPaint.measureText(stepText);
+
+            // pozycja żetonu obok tekstu
+            float cx = getWidth() / 2f + textWidth / 2f + 10f;
+            float cy = getHeight() / 2f + 25f - (tokenSize / 2f);
+
+            tokenDrawable.setBounds(
+                    (int) cx,
+                    (int) cy,
+                    (int) (cx + tokenSize),
+                    (int) (cy + tokenSize)
+            );
+            tokenDrawable.draw(canvas);
+        }
+
 
         // najpierw glow
         canvas.drawText(stepText,
@@ -105,4 +125,9 @@ public class SemiCircleProgressView extends View {
         this.progress = (int) ((float) current / max * 100f);
         invalidate();
     }
+    public void setTokenDrawable(int drawableRes) {
+        tokenDrawable = getResources().getDrawable(drawableRes, null);
+        invalidate();
+    }
+
 }
