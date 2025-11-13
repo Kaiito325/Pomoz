@@ -1,6 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="?android:attr/windowBackground">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:dividerPadding="8dp"
+        android:showDividers="middle">
+
+        <EditText
+            android:id="@+id/input_task_name"
+            style="@style/EditFieldStyle"
+            android:hint="Nazwa zadania"
+            android:inputType="textCapSentences" />
+
+        <EditText
+            android:id="@+id/input_description"
+            style="@style/EditFieldStyle"
+            android:hint="Opis"
+            android:inputType="textMultiLine"
+            android:minLines="3"
+            android:gravity="top" />
+
+        <EditText
+            android:id="@+id/input_action"
+            style="@style/EditFieldStyle"
+            android:hint="Czynność"
+            android:focusable="false"
+            android:clickable="true"
+            android:inputType="none"
+            android:drawableEnd="@drawable/search_small" />
+
+        <EditText
+            android:id="@+id/input_area"
+            style="@style/EditFieldStyle"
+            android:hint="Powierzchnia"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/input_quantity"
+            style="@style/EditFieldStyle"
+            android:hint="Ilość"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/input_task_time"
+            style="@style/EditFieldStyle"
+            android:hint="Czas zadania (minuty)"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/input_due_date"
+            style="@style/EditFieldStyle"
+            android:hint="Termin"
+            android:focusable="false"
+            android:clickable="true"
+            android:inputType="none"
+            android:drawableEnd="@drawable/calendar_small" />
+
+        <EditText
+            android:id="@+id/input_difficulty"
+            style="@style/EditFieldStyle"
+            android:hint="Trudność"
+            android:enabled="false" />
+
+        <EditText
+            android:id="@+id/input_total_points"
+            style="@style/EditFieldStyle"
+            android:hint="Suma punktów"
+            android:enabled="false" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="24dp"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/btn_cancel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Anuluj"
+                android:backgroundTint="@color/gray" />
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="match_parent" />
+
+            <Button
+                android:id="@+id/btn_add"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Dodaj"
+                android:backgroundTint="@color/nenonGreen"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

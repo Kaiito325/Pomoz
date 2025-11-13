@@ -4,6 +4,13 @@
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
+    <style name="Theme.Pomoz" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Kolory aplikacji -->
+        <item name="colorPrimary">@color/nenonGreen</item>
+        <item name="colorPrimaryContainer">@color/nenonGreenLight</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSecondary">@color/cyan</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+    </style>
 
-    <style name="Theme.Pomoz" parent="Base.Theme.Pomoz" />
 </resources>

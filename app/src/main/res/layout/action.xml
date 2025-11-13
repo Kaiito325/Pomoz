@@ -1,0 +1,23 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:gravity="center_vertical">
+
+    <ImageView
+        android:id="@+id/icon_czynnosc"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:tint="@color/nenonGreen"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="@string/action_icon" />
+
+    <TextView
+        android:id="@+id/nazwa_czynnosc"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="16sp"/>
+</LinearLayout>

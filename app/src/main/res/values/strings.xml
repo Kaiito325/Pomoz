@@ -10,4 +10,6 @@
     <string name="description">opis</string>
     <string name="location">lokalizacja</string>
     <string name="available_tasks">Dostępne zadania</string>
+    <string name="action_icon">Ikona czynności</string>
+    <string name="searchAction">Szukaj czynności</string>
 </resources>
