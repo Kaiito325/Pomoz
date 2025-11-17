@@ -71,6 +71,12 @@ public class HomeFragment extends Fragment {
         taskAdapter = new TaskAdapter(tasks);
         availableTasks.setAdapter(taskAdapter);
 
+        Fragment calendarFragment = new CalendarFragment();
+        getChildFragmentManager()
+                .beginTransaction()
+                .replace(R.id.calendarContainer, calendarFragment)
+                .commit();
+
 
         return v;
     }
