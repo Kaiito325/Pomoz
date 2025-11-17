@@ -3,10 +3,12 @@ package com.example.pomoz.data.db_config;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.FormBody;
@@ -77,9 +79,6 @@ public class ApiClient {
         return client;
     }
 
-    // -----------------------
-    //       HELPER POST
-    // -----------------------
     public Response post(String action, Map<String, String> data) throws IOException {
 
         HttpUrl url = HttpUrl.parse(BASE_URL)
@@ -100,9 +99,6 @@ public class ApiClient {
         return client.newCall(request).execute();
     }
 
-    // -----------------------
-    //       HELPER GET
-    // -----------------------
     public Response get(String action, Map<String, String> params) throws IOException {
 
         HttpUrl.Builder url = HttpUrl.parse(BASE_URL)
@@ -124,9 +120,6 @@ public class ApiClient {
     }
 
 
-    // -----------------------
-    // REFRESH TOKEN
-    // -----------------------
     private boolean refreshToken() {
         String refresh = prefs.getString("refresh_token", null);
         if (refresh == null) return false;
@@ -157,6 +150,82 @@ public class ApiClient {
 
         return false;
     }
+    public JSONObject login(String email, String password) throws IOException {
+        Map<String, String> data = new HashMap<>();
+        data.put("login", email);
+        data.put("haslo", password);
+
+        Response response = post("login", data);
+
+        if (response.body() == null) {
+            Log.e("API_LOGIN", "Response body is null");
+            return null;
+        }
+
+        // odczyt body tylko raz
+        String bodyStr = response.body().string();
+        Log.d("API_LOGIN", "Code: " + response.code() + ", Body: " + bodyStr);
+
+        if (response.isSuccessful()) {
+            try {
+                JSONObject obj = new JSONObject(bodyStr);
+
+                // jeśli login się powiódł, zapisujemy tokeny
+                if (obj.has("access_token") && obj.has("refresh_token")) {
+                    prefs.edit()
+                            .putString("access_token", obj.getString("access_token"))
+                            .putString("refresh_token", obj.getString("refresh_token"))
+                            .putString("imie", obj.optString("imie"))
+                            .putString("rola", obj.optString("rola"))
+                            .apply();
+                }
+
+                return obj;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.e("API_LOGIN", "Login failed with code: " + response.code());
+        }
+
+        return null;
+    }
+
+
+    public JSONObject register(String email, String password, String imie, String city) throws IOException {
+        Map<String, String> data = new HashMap<>();
+        data.put("login", email);
+        data.put("haslo", password);
+        data.put("imie", imie);
+        data.put("miejscowosc", city);
+
+        Response response = post("register", data);
+
+        if (response.isSuccessful() && response.body() != null) {
+            try {
+                JSONObject obj = new JSONObject(response.body().string());
+
+                // jeśli rejestracja się powiodła i API zwraca tokeny
+                if (obj.has("access_token") && obj.has("refresh_token")) {
+                    prefs.edit()
+                            .putString("access_token", obj.getString("access_token"))
+                            .putString("refresh_token", obj.getString("refresh_token"))
+                            .putString("imie", obj.optString("imie"))
+                            .putString("rola", obj.optString("rola"))
+                            .putString("miejscowosc", obj.optString("miejscowosc"))
+                            .apply();
+                }
+
+                return obj;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
+    }
+
+
     public boolean isLoggedIn() {
         String token = prefs.getString("access_token", null);
         return token != null && !token.trim().isEmpty();
@@ -167,6 +236,7 @@ public class ApiClient {
                 .remove("refresh_token")
                 .remove("imie")
                 .remove("rola")
+                .remove("miejscowosc")
                 .apply();
     }
 }

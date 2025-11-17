@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="#FFFFFF">
+
+    <!-- Tytuł -->
+    <TextView
+        android:id="@+id/loginTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Logowanie"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:paddingBottom="24dp"/>
+
+    <!-- Pole na e-mail -->
+    <EditText
+        android:id="@+id/emailInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Adres e-mail"
+        android:inputType="textEmailAddress"
+        android:padding="12dp"/>
+
+    <!-- Pole na hasło -->
+    <EditText
+        android:id="@+id/passwordInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Hasło"
+        android:inputType="textPassword"
+        android:padding="12dp"
+        android:layout_marginTop="12dp"/>
+
+    <!-- Przycisk logowania -->
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Zaloguj się"
+        android:layout_marginTop="20dp"/>
+
+    <!-- Link do rejestracji -->
+    <TextView
+        android:id="@+id/registerLink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nie masz konta? Zarejestruj się"
+        android:textSize="14sp"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="4dp"
+        android:background="@drawable/register_ripple"
+        android:layout_marginTop="16dp"/>
+
+</LinearLayout>
