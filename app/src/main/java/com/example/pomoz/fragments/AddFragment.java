@@ -2,6 +2,7 @@ package com.example.pomoz.fragments;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,17 +20,28 @@ import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.pomoz.R;
+import com.example.pomoz.activities.LoginActivity;
+import com.example.pomoz.activities.MainActivity;
 import com.example.pomoz.adapters.ActionAdapter;
+import com.example.pomoz.data.db_config.ApiClient;
 import com.example.pomoz.model_classes.Action;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import okhttp3.Response;
 
 public class AddFragment extends Fragment {
 
@@ -88,20 +100,49 @@ public class AddFragment extends Fragment {
             RecyclerView recyclerView = dialogView.findViewById(R.id.actionRecyclerView);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-            List<Action> lista = new ArrayList<>();
-            lista.add(new Action("Koszenie trawy"));
-            lista.add(new Action("Malowanie ścian"));
-            lista.add(new Action("Sprzątanie hali"));
-            lista.add(new Action("Mycie okien"));
-            lista.add(new Action("Naprawa sprzętu"));
-            lista.add(new Action("Pomoc przy komputerze"));
-
             AlertDialog dialog = builder.create();
+            dialog.show();
+
+            List<Action> lista = new ArrayList<>();
             ActionAdapter adapter = new ActionAdapter(lista, a -> {
                 inputAction.setText(a.getName());
                 dialog.dismiss();
             });
             recyclerView.setAdapter(adapter);
+
+            new Thread(() -> {
+                try {
+                    Response response = ApiClient.getInstance(getContext())
+                            .post("get_tasks");
+
+                    if (response.isSuccessful() && response.body() != null) {
+                        String bodyStr = response.body().string();
+                        JSONArray tasks = new JSONArray(bodyStr);
+
+                        List<Action> downloaded = new ArrayList<>();
+                        for (int i = 0; i < tasks.length(); i++) {
+                            JSONObject task = tasks.getJSONObject(i);
+                            downloaded.add(new Action(task.getString("nazwa")));
+                        }
+
+                        // Aktualizacja UI w wątku głównym
+                        requireActivity().runOnUiThread(() -> {
+                            adapter.updateList(downloaded);
+                            Toast.makeText(getContext(), "Pobrano " + downloaded.size() + " zadań", Toast.LENGTH_SHORT).show();
+                        });
+                    } else {
+                        requireActivity().runOnUiThread(() ->
+                                Toast.makeText(getContext(), "Błąd pobierania zadań", Toast.LENGTH_SHORT).show()
+                        );
+                    }
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                    requireActivity().runOnUiThread(() ->
+                            Toast.makeText(getContext(), "Błąd sieci lub parsowania JSON", Toast.LENGTH_SHORT).show()
+                    );
+                }
+            }).start();
+
 
             search.addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -110,8 +151,7 @@ public class AddFragment extends Fragment {
                 }
                 @Override public void afterTextChanged(Editable s) {}
             });
-
-            dialog.show();
         });
     }
+
 }

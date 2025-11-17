@@ -98,6 +98,23 @@ public class ApiClient {
 
         return client.newCall(request).execute();
     }
+    public Response post(String action) throws IOException {
+        HttpUrl url = HttpUrl.parse(BASE_URL)
+                .newBuilder()
+                .addQueryParameter("action", action)
+                .build();
+
+        // Tworzymy pusty body (application/x-www-form-urlencoded)
+        RequestBody body = new FormBody.Builder().build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        return client.newCall(request).execute();
+    }
+
 
     public Response get(String action, Map<String, String> params) throws IOException {
 
