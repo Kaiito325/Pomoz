@@ -13,13 +13,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.pomoz.R;
@@ -39,11 +42,17 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Response;
 
 public class AddFragment extends Fragment {
+    private ProgressBar progressBar;
+    private EditText inputTaskName, inputDescription, inputArea, inputQuantity,
+            inputTaskTime, inputDifficulty, inputTotalPoints;
+
 
     public AddFragment() {
     }
@@ -59,7 +68,18 @@ public class AddFragment extends Fragment {
 
         inputTerm = v.findViewById(R.id.input_due_date);
         inputAction= v.findViewById(R.id.input_action);
+        inputTaskName = v.findViewById(R.id.input_task_name);
+        inputDescription = v.findViewById(R.id.input_description);
+        inputArea = v.findViewById(R.id.input_area);
+        inputQuantity = v.findViewById(R.id.input_quantity);
+        inputTaskTime = v.findViewById(R.id.input_task_time);
+        inputDifficulty = v.findViewById(R.id.input_difficulty);
+        inputTotalPoints = v.findViewById(R.id.input_total_points);
 
+        Button btnAdd = v.findViewById(R.id.btn_add);
+        btnAdd.setOnClickListener(view -> sendTask());
+        Button btnCancel = v.findViewById(R.id.btn_cancel);
+        btnCancel.setOnClickListener(view -> clear());
 
         setupTermPicker();
         setupActionDialog();
@@ -92,6 +112,7 @@ public class AddFragment extends Fragment {
 
     private void setupActionDialog() {
         inputAction.setOnClickListener(v -> {
+
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             View dialogView = getLayoutInflater().inflate(R.layout.action_dialog, null);
             builder.setView(dialogView);
@@ -99,7 +120,7 @@ public class AddFragment extends Fragment {
             EditText search = dialogView.findViewById(R.id.searchEditText);
             RecyclerView recyclerView = dialogView.findViewById(R.id.actionRecyclerView);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
+            progressBar = dialogView.findViewById(R.id.loadingProgressBar);
             AlertDialog dialog = builder.create();
             dialog.show();
 
@@ -111,6 +132,9 @@ public class AddFragment extends Fragment {
             recyclerView.setAdapter(adapter);
 
             new Thread(() -> {
+                requireActivity().runOnUiThread(() ->
+                        progressBar.setVisibility(View.VISIBLE)
+                );
                 try {
                     Response response = ApiClient.getInstance(getContext())
                             .post("get_tasks");
@@ -128,12 +152,14 @@ public class AddFragment extends Fragment {
                         // Aktualizacja UI w wątku głównym
                         requireActivity().runOnUiThread(() -> {
                             adapter.updateList(downloaded);
+                            progressBar.setVisibility(View.GONE);
                             Toast.makeText(getContext(), "Pobrano " + downloaded.size() + " zadań", Toast.LENGTH_SHORT).show();
                         });
                     } else {
-                        requireActivity().runOnUiThread(() ->
-                                Toast.makeText(getContext(), "Błąd pobierania zadań", Toast.LENGTH_SHORT).show()
-                        );
+                        requireActivity().runOnUiThread(() -> {
+                            progressBar.setVisibility(View.GONE);
+                            Toast.makeText(getContext(), "Błąd pobierania zadań", Toast.LENGTH_SHORT).show();
+                        });
                     }
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
@@ -154,4 +180,79 @@ public class AddFragment extends Fragment {
         });
     }
 
+    private void sendTask() {
+
+        // Pobranie danych z pól
+        String taskName = inputTaskName.getText().toString().trim();
+        String description = inputDescription.getText().toString().trim();
+        String action = inputAction.getText().toString().trim();
+        String area = inputArea.getText().toString().trim();
+        String quantity = inputQuantity.getText().toString().trim();
+        String taskTime = inputTaskTime.getText().toString().trim();
+        String dueDate = inputTerm.getText().toString().trim();
+        String difficulty = inputDifficulty.getText().toString().trim();
+        String totalPoints = inputTotalPoints.getText().toString().trim();
+
+        // Walidacja
+        if (taskName.isEmpty()) {
+            Toast.makeText(getContext(), "Podaj nazwę zadania", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // WYSYŁANIE W NOWYM WĄTKU
+        new Thread(() -> {
+
+            requireActivity().runOnUiThread(() -> progressBar.setVisibility(View.VISIBLE));
+
+            try {
+                // Tworzenie JSON do wysyłki
+                Map<String, String> data = new HashMap<>();
+                data.put("name", taskName);
+                data.put("description", description);
+                data.put("action", action);
+                data.put("area", area);
+                data.put("quantity", quantity);
+                data.put("task_time", taskTime);
+                data.put("due_date", dueDate);
+                data.put("difficulty", difficulty);
+                data.put("total_points", totalPoints);
+
+                Response response = ApiClient.getInstance(getContext())
+                        .post("add_task", data);
+
+                Log.d("TAG", "sendTask: "  + data.toString());
+
+                requireActivity().runOnUiThread(() -> {
+                    progressBar.setVisibility(View.GONE);
+
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(), "Zadanie dodane!", Toast.LENGTH_SHORT).show();
+                        Log.d("TAG", "sendTask: " + response);
+                    } else {
+                        Toast.makeText(getContext(), "Błąd serwera", Toast.LENGTH_SHORT).show();
+                        Log.d("TAG", "sendTask: " + response);
+                    }
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                requireActivity().runOnUiThread(() -> {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), "Błąd sieci", Toast.LENGTH_SHORT).show();
+                });
+            }
+
+        }).start();
+    }
+    private void clear() {
+        inputTaskName.setText("");
+        inputDescription.setText("");
+        inputAction.setText("");
+        inputArea.setText("");
+        inputQuantity.setText("");
+        inputTaskTime.setText("");
+        inputTerm.setText("");
+        inputDifficulty.setText("");
+        inputTotalPoints.setText("");
+    }
 }

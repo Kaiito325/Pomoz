@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pomoz.R;
+import com.example.pomoz.model_classes.Action;
 import com.example.pomoz.model_classes.Task;
 
 import java.util.List;

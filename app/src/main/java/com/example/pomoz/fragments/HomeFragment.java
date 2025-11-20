@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,18 +15,27 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pomoz.R;
 import com.example.pomoz.adapters.TaskAdapter;
+import com.example.pomoz.data.db_config.ApiClient;
+import com.example.pomoz.model_classes.Action;
 import com.example.pomoz.model_classes.Task;
 import com.example.pomoz.views.SemiCircleProgressView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Response;
 
 public class HomeFragment extends Fragment {
     public HomeFragment() {}
     private TextView uniquePersons, tasksDone;
     private TextView totalPersons, totalTokens, totalTasks;
     private RecyclerView availableTasks;
-    private List<Task> tasks = new ArrayList<>();
+//    private List<Task> tasks = new ArrayList<>();
     private TaskAdapter taskAdapter;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
@@ -65,10 +75,35 @@ public class HomeFragment extends Fragment {
         animation.start();
 
         availableTasks.setLayoutManager(new LinearLayoutManager(getContext()));
+        new Thread(() ->{
+            try{
+                Response response = ApiClient.getInstance(getContext()).post("get_actual_tasks");
+                if (response.isSuccessful() && response.body() != null) {
+                    String bodyStr = response.body().string();
+                    JSONArray tasks = new JSONArray(bodyStr);
 
-        tasks.add(new Task("Koszenie trawy", "Powierzchnia 6-10a", "Wodzisław Śląski", 150));
-        tasks.add(new Task("Zrobić zakupy", "Ilość przedmiotów: 5-10", "Wodzisław Śląski", 20));
-        taskAdapter = new TaskAdapter(tasks);
+                    List<Task> downloaded = new ArrayList<>();
+                    for (int i = 0; i < tasks.length(); i++) {
+                        JSONObject task = tasks.getJSONObject(i);
+                        downloaded.add(new Task(task.getString("nazwa"), task.getString("opis"), task.getString("miejscowocs"), Integer.parseInt(task.getString("sumaPkt"))));
+                    }
+
+                    // Aktualizacja UI w wątku głównym
+                    requireActivity().runOnUiThread(() -> {
+                        taskAdapter = new TaskAdapter(downloaded);
+                        Toast.makeText(getContext(), "Pobrano " + downloaded.size() + " zadań", Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    requireActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "Błąd pobierania zadań", Toast.LENGTH_SHORT).show()
+                    );
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
         availableTasks.setAdapter(taskAdapter);
 
         Fragment calendarFragment = new CalendarFragment();

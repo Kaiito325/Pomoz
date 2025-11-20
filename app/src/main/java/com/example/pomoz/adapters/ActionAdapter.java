@@ -53,14 +53,17 @@ public class ActionAdapter extends RecyclerView.Adapter<ActionAdapter.ActionView
 
     public class ActionViewHolder extends RecyclerView.ViewHolder {
         TextView nameText;
+        ImageView actionImage;
 
         public ActionViewHolder(@NonNull View itemView) {
             super(itemView);
             nameText = itemView.findViewById(R.id.action_name);
+            actionImage = itemView.findViewById(R.id.action_icon);
         }
 
         public void bind(Action action) {
             nameText.setText(action.getName());
+            actionImage.setImageResource(action.getImgResID());
             itemView.setOnClickListener(v -> listener.onItemClick(action));
         }
     }
@@ -99,6 +102,6 @@ public class ActionAdapter extends RecyclerView.Adapter<ActionAdapter.ActionView
     public void updateList(List<Action> newList) {
         fullList.clear();
         fullList.addAll(newList);
-        getFilter().filter(""); // od razu pokazuje wszystkie elementy
+        getFilter().filter("");
     }
 }
