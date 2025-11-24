@@ -12,4 +12,5 @@
     <string name="available_tasks">Dostępne zadania</string>
     <string name="action_icon">Ikona czynności</string>
     <string name="searchAction">Szukaj czynności</string>
+    <string name="logout">wyloguj</string>
 </resources>

@@ -34,6 +34,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             taskTokens = itemView.findViewById(R.id.taskTokens);
         }
     }
+    public void updateTasks(List<Task> newTasks) {
+        taskList.clear();
+        taskList.addAll(newTasks);
+        notifyDataSetChanged();
+    }
 
     @NonNull
     @Override

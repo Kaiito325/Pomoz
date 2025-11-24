@@ -2,6 +2,7 @@ package com.example.pomoz.fragments;
 
 import android.animation.ValueAnimator;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,10 +75,16 @@ public class HomeFragment extends Fragment {
         });
         animation.start();
 
+
         availableTasks.setLayoutManager(new LinearLayoutManager(getContext()));
+        taskAdapter = new TaskAdapter(new ArrayList<>()); // pusty adapter na start
+        availableTasks.setAdapter(taskAdapter);
+
+
         new Thread(() ->{
             try{
                 Response response = ApiClient.getInstance(getContext()).post("get_actual_tasks");
+                Log.d("TAG", "onCreateView: " + response);
                 if (response.isSuccessful() && response.body() != null) {
                     String bodyStr = response.body().string();
                     JSONArray tasks = new JSONArray(bodyStr);
@@ -85,12 +92,13 @@ public class HomeFragment extends Fragment {
                     List<Task> downloaded = new ArrayList<>();
                     for (int i = 0; i < tasks.length(); i++) {
                         JSONObject task = tasks.getJSONObject(i);
-                        downloaded.add(new Task(task.getString("nazwa"), task.getString("opis"), task.getString("miejscowocs"), Integer.parseInt(task.getString("sumaPkt"))));
+                        Log.d("TAG", "task: " + task);
+                        downloaded.add(new Task(task.getString("nazwa"), task.getString("opis"), task.getString("miejscowosc"), Integer.parseInt(task.getString("sumaPkt"))));
                     }
 
                     // Aktualizacja UI w wątku głównym
                     requireActivity().runOnUiThread(() -> {
-                        taskAdapter = new TaskAdapter(downloaded);
+                        taskAdapter.updateTasks(downloaded);
                         Toast.makeText(getContext(), "Pobrano " + downloaded.size() + " zadań", Toast.LENGTH_SHORT).show();
                     });
                 } else {
@@ -103,8 +111,8 @@ public class HomeFragment extends Fragment {
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
-        });
-        availableTasks.setAdapter(taskAdapter);
+        }).start();
+
 
         Fragment calendarFragment = new CalendarFragment();
         getChildFragmentManager()
@@ -115,4 +123,5 @@ public class HomeFragment extends Fragment {
 
         return v;
     }
+
 }

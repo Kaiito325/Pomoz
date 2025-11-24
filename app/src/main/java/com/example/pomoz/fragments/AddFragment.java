@@ -87,9 +87,8 @@ public class AddFragment extends Fragment {
         return v;
     }
 
-    private void setupTermPicker () {
+    private void setupTermPicker() {
         inputTerm.setOnClickListener(v -> {
-
 
             CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder()
                     .setValidator(DateValidatorPointForward.now());
@@ -102,12 +101,22 @@ public class AddFragment extends Fragment {
                             .build();
 
             picker.addOnPositiveButtonClickListener(selection -> {
-                inputTerm.setText(picker.getHeaderText());
+                // selection = timestamp (Long)
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(selection);
+
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH) + 1; // 0–11, więc +1
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+                String formatted = String.format("%04d-%02d-%02d", year, month, day);
+                inputTerm.setText(formatted);
             });
 
             picker.show(getParentFragmentManager(), "DATE_PICKER");
         });
     }
+
 
 
     private void setupActionDialog() {
@@ -127,6 +136,20 @@ public class AddFragment extends Fragment {
             List<Action> lista = new ArrayList<>();
             ActionAdapter adapter = new ActionAdapter(lista, a -> {
                 inputAction.setText(a.getName());
+                switch (a.getType()) {
+                    case "powierzchnia":
+                        inputArea.setVisibility(View.VISIBLE);
+                        inputQuantity.setVisibility(View.GONE);
+                        break;
+                    case "ilosc":
+                        inputQuantity.setVisibility(View.VISIBLE);
+                        inputArea.setVisibility(View.GONE);
+                        break;
+                    default:
+                        inputArea.setVisibility(View.GONE);
+                        inputQuantity.setVisibility(View.GONE);
+                        break;
+                }
                 dialog.dismiss();
             });
             recyclerView.setAdapter(adapter);
@@ -146,7 +169,7 @@ public class AddFragment extends Fragment {
                         List<Action> downloaded = new ArrayList<>();
                         for (int i = 0; i < tasks.length(); i++) {
                             JSONObject task = tasks.getJSONObject(i);
-                            downloaded.add(new Action(task.getString("nazwa")));
+                            downloaded.add(new Action(task.getString("nazwa"), Float.parseFloat(task.getString("mnoznik")), task.getString("typ"), task.getString("img_id"), getContext()));
                         }
 
                         // Aktualizacja UI w wątku głównym
@@ -209,7 +232,7 @@ public class AddFragment extends Fragment {
                 Map<String, String> data = new HashMap<>();
                 data.put("name", taskName);
                 data.put("description", description);
-                data.put("action", action);
+                data.put("task_action", action);
                 data.put("area", area);
                 data.put("quantity", quantity);
                 data.put("task_time", taskTime);
@@ -225,13 +248,30 @@ public class AddFragment extends Fragment {
                 requireActivity().runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
 
-                    if (response.isSuccessful()) {
-                        Toast.makeText(getContext(), "Zadanie dodane!", Toast.LENGTH_SHORT).show();
-                        Log.d("TAG", "sendTask: " + response);
+                    if (response.body() != null) {
+                        try {
+                            String responseBody = response.body() != null ? response.body().string() : "";
+                            Log.d("TAG", "RAW RESPONSE: " + responseBody);
+                            JSONObject json = new JSONObject(responseBody);
+
+                            if (json.has("error")) {
+                                Toast.makeText(getContext(), "Błąd: " + json.getString("error"), Toast.LENGTH_LONG).show();
+                            } else if (json.has("success") && json.getBoolean("success")) {
+                                Toast.makeText(getContext(), "Zadanie dodane! ID: " + json.optInt("task_id"), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getContext(), "Nieoczekiwana odpowiedź: " + responseBody, Toast.LENGTH_LONG).show();
+                            }
+                            Log.d("TAG", "sendTask: " + responseBody);
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(getContext(), "Błąd parsowania odpowiedzi", Toast.LENGTH_SHORT).show();
+                        }
                     } else {
-                        Toast.makeText(getContext(), "Błąd serwera", Toast.LENGTH_SHORT).show();
-                        Log.d("TAG", "sendTask: " + response);
+                        Toast.makeText(getContext(), "Brak odpowiedzi z serwera", Toast.LENGTH_SHORT).show();
                     }
+
+
                 });
 
             } catch (Exception e) {

@@ -41,13 +41,15 @@
             android:id="@+id/input_area"
             style="@style/EditFieldStyle"
             android:hint="Powierzchnia"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:visibility="gone"/>
 
         <EditText
             android:id="@+id/input_quantity"
             style="@style/EditFieldStyle"
             android:hint="Ilość"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:visibility="gone"/>
 
         <EditText
             android:id="@+id/input_task_time"
