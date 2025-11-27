@@ -1,9 +1,11 @@
 package com.example.pomoz.model_classes;
 
+import android.content.Context;
+
 import java.io.Serializable;
 
 public class Task implements Serializable {
-    private int id, userId, actionId;
+    private int id, userId, actionId, imgId;
     private String name, description, time, term, difficulty,location;
     private int tokens;
 
@@ -14,8 +16,10 @@ public class Task implements Serializable {
         this.tokens = tokens;
     }
 
-    public Task(int id, int userId, int tokens, int actionId, String name, String description, String time, String term, String difficulty, String location) {
+    public Task(int id, int userId, int tokens, int actionId, String name, String imgId, String description, String time, String term, String difficulty, String location, Context context) {
         this(name, description, location, tokens);
+        String img = imgId.equals("null")? imgId: "action_icon";
+        this.imgId = context.getResources().getIdentifier(img, "drawable", context.getPackageName());
         this.id = id;
         this.userId = userId;
         this.actionId = actionId;

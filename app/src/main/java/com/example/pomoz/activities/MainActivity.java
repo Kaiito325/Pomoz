@@ -1,17 +1,23 @@
 package com.example.pomoz.activities;
 
+import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager2.widget.ViewPager2;
+import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -57,23 +63,65 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }).attach();
+        Log.d("WORK_TEST", "Worker enqueued");
+        checkNotificationsEnabled();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager manager = getSystemService(NotificationManager.class);
             NotificationChannel channel = new NotificationChannel(
                     "default",
                     "Powiadomienia",
-                    NotificationManager.IMPORTANCE_DEFAULT
+                    NotificationManager.IMPORTANCE_HIGH
             );
+            NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(channel);
         }
+        boolean enabled = NotificationManagerCompat.from(this).areNotificationsEnabled();
+
+        if (enabled) {
+            startWorker();
+        }
+
+
+    }
+    private void startWorker() {
+
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .setRequiresBatteryNotLow(false)
+                .setRequiresCharging(false)
+                .build();
+
         PeriodicWorkRequest workRequest =
-                new PeriodicWorkRequest.Builder(NotificationWorker.class, 1, TimeUnit.MINUTES)
+                new PeriodicWorkRequest.Builder(NotificationWorker.class, 15, TimeUnit.MINUTES)
+                        .setConstraints(constraints)
                         .build();
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
                 "notification_polling",
-                ExistingPeriodicWorkPolicy.KEEP,
-                workRequest);
-
+                ExistingPeriodicWorkPolicy.UPDATE,
+                workRequest
+        );
     }
+
+    private void checkNotificationsEnabled() {
+        boolean enabled = NotificationManagerCompat.from(this).areNotificationsEnabled();
+
+        if (!enabled) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Włącz powiadomienia")
+                    .setMessage("Aby otrzymywać powiadomienia, włącz je w ustawieniach systemowych.")
+                    .setPositiveButton("Przejdź do ustawień", (dialog, which) -> {
+                        Intent intent = new Intent();
+                        intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+                        intent.putExtra("android.provider.extra.APP_PACKAGE", getPackageName());
+                        startActivity(intent);
+                    })
+                    .setNegativeButton("Anuluj", null)
+                    .show();
+        } else {
+            // Powiadomienia są włączone → uruchamiamy worker
+            startWorker();
+        }
+    }
+
+
 }

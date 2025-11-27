@@ -182,7 +182,8 @@ public class AddFragment extends Fragment {
                         List<Action> downloaded = new ArrayList<>();
                         for (int i = 0; i < tasks.length(); i++) {
                             JSONObject task = tasks.getJSONObject(i);
-                            downloaded.add(new Action(task.getString("nazwa"), Float.parseFloat(task.getString("mnoznik")), task.getString("typ"), task.getString("img_id"), getContext()));
+                            Log.d("TAG", "setupActionDialog: " + task.toString());
+                            downloaded.add(new Action(task.getString("nazwa"), Float.parseFloat(task.getString("mnoznik")), task.getString("typ"), task.getString("img_id").equals("null")? "action_icon": task.getString("img_id"), getContext()));
                         }
 
                         // Aktualizacja UI w wątku głównym
@@ -322,7 +323,7 @@ public class AddFragment extends Fragment {
 
         // ilość lub metr kw.
         if (action.getType().equals("powierzchnia")) {
-            value = areaStr.isEmpty() ? 0 : Float.parseFloat(areaStr);
+            value = areaStr.isEmpty() ? 0 : Float.parseFloat(areaStr)/100;
         } else if (action.getType().equals("ilosc")) {
             value = quantityStr.isEmpty() ? 0 : Float.parseFloat(quantityStr);
         }

@@ -93,6 +93,7 @@ public class HomeFragment extends Fragment {
         new Thread(() -> {
             try {
                 Response response = ApiClient.getInstance(getContext()).post("get_actual_tasks");
+                Context context = getContext();
 
                 if (response.isSuccessful() && response.body() != null) {
                     String bodyStr = response.body().string();
@@ -108,11 +109,13 @@ public class HomeFragment extends Fragment {
                                 Integer.parseInt(task.getString("sumaPkt")),
                                 Integer.parseInt(task.getString("czynnosc")),
                                 task.getString("nazwa"),
+                                task.getString("img_id"),
                                 task.getString("opis"),
                                 task.getString("czas"),
                                 task.getString("termin"),
                                 task.getString("trudnosc"),
-                                task.getString("miejscowosc")
+                                task.getString("miejscowosc"),
+                                context
                         ));
                     }
 

@@ -3,6 +3,8 @@ package com.example.pomoz.data;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -44,6 +46,9 @@ public class NotificationWorker extends Worker {
 
             // synchroniczne wywołanie
             Response response = ApiClient.getInstance(context).get("get_notifications", params);
+            Log.d("TAG", "doWork: " + response.body());
+            Log.d("WORK_TEST", "Worker started");
+
 
             if (!response.isSuccessful() || response.body() == null) return Result.failure();
 
@@ -67,18 +72,13 @@ public class NotificationWorker extends Worker {
 
     private void showNotification(Context context, String title, String body) {
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    "default",
-                    "Default Channel",
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            manager.createNotificationChannel(channel);
-        }
-
+        Bitmap largeIcon = BitmapFactory.decodeResource(
+                context.getResources(),
+                R.drawable.honor_token // twoja ikona
+        );
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "default")
                 .setSmallIcon(R.drawable.honor_token)
+                .setLargeIcon(largeIcon)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setAutoCancel(true)

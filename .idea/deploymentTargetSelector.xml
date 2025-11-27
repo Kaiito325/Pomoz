@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-11-25T18:37:59.688022500Z">
+        <DropdownSelection timestamp="2025-11-27T10:34:44.332852797Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=334047c6" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/home/kaiito/.android/avd/Medium_Phone.avd" />
             </handle>
           </Target>
         </DropdownSelection>
