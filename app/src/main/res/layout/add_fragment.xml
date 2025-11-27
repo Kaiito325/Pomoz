@@ -40,7 +40,7 @@
         <EditText
             android:id="@+id/input_area"
             style="@style/EditFieldStyle"
-            android:hint="Powierzchnia"
+            android:hint="Powierzchnia [a]"
             android:inputType="numberDecimal"
             android:visibility="gone"/>
 
@@ -66,11 +66,12 @@
             android:inputType="none"
             android:drawableEnd="@drawable/calendar_small" />
 
-        <EditText
-            android:id="@+id/input_difficulty"
+        <Spinner
+            android:id="@+id/spinnerDifficulty"
             style="@style/EditFieldStyle"
-            android:hint="Trudność"
-            android:enabled="false" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
 
         <EditText
             android:id="@+id/input_total_points"

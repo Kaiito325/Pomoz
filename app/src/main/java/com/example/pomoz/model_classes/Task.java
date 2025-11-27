@@ -1,7 +1,10 @@
 package com.example.pomoz.model_classes;
 
-public class Task {
-    private String name, description, location;
+import java.io.Serializable;
+
+public class Task implements Serializable {
+    private int id, userId, actionId;
+    private String name, description, time, term, difficulty,location;
     private int tokens;
 
     public Task(String name, String description, String location, int tokens) {
@@ -9,6 +12,64 @@ public class Task {
         this.description = description;
         this.location = location;
         this.tokens = tokens;
+    }
+
+    public Task(int id, int userId, int tokens, int actionId, String name, String description, String time, String term, String difficulty, String location) {
+        this(name, description, location, tokens);
+        this.id = id;
+        this.userId = userId;
+        this.actionId = actionId;
+        this.time = time;
+        this.term = term;
+        this.difficulty = difficulty;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public int getActionId() {
+        return actionId;
+    }
+
+    public void setActionId(int actionId) {
+        this.actionId = actionId;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public String getTerm() {
+        return term;
+    }
+
+    public void setTerm(String term) {
+        this.term = term;
+    }
+
+    public String getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
     }
 
     public String getName() {

@@ -23,12 +23,14 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.pomoz.R;
 import com.example.pomoz.activities.LoginActivity;
 import com.example.pomoz.activities.MainActivity;
 import com.example.pomoz.adapters.ActionAdapter;
+import com.example.pomoz.adapters.StarAdapter;
 import com.example.pomoz.data.db_config.ApiClient;
 import com.example.pomoz.model_classes.Action;
 import com.google.android.material.datepicker.CalendarConstraints;
@@ -51,7 +53,9 @@ import okhttp3.Response;
 public class AddFragment extends Fragment {
     private ProgressBar progressBar;
     private EditText inputTaskName, inputDescription, inputArea, inputQuantity,
-            inputTaskTime, inputDifficulty, inputTotalPoints;
+            inputTaskTime, inputTotalPoints;
+    private Action selectedAction;
+    private Spinner spinnerDifficulty;
 
 
     public AddFragment() {
@@ -73,13 +77,21 @@ public class AddFragment extends Fragment {
         inputArea = v.findViewById(R.id.input_area);
         inputQuantity = v.findViewById(R.id.input_quantity);
         inputTaskTime = v.findViewById(R.id.input_task_time);
-        inputDifficulty = v.findViewById(R.id.input_difficulty);
+
+
         inputTotalPoints = v.findViewById(R.id.input_total_points);
 
         Button btnAdd = v.findViewById(R.id.btn_add);
         btnAdd.setOnClickListener(view -> sendTask());
         Button btnCancel = v.findViewById(R.id.btn_cancel);
         btnCancel.setOnClickListener(view -> clear());
+        spinnerDifficulty = v.findViewById(R.id.spinnerDifficulty);
+
+        List<Integer> stars = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) stars.add(i);
+
+        StarAdapter adapter = new StarAdapter(getContext(), stars);
+        spinnerDifficulty.setAdapter(adapter);
 
         setupTermPicker();
         setupActionDialog();
@@ -135,6 +147,7 @@ public class AddFragment extends Fragment {
 
             List<Action> lista = new ArrayList<>();
             ActionAdapter adapter = new ActionAdapter(lista, a -> {
+                selectedAction = a;
                 inputAction.setText(a.getName());
                 switch (a.getType()) {
                     case "powierzchnia":
@@ -213,14 +226,21 @@ public class AddFragment extends Fragment {
         String quantity = inputQuantity.getText().toString().trim();
         String taskTime = inputTaskTime.getText().toString().trim();
         String dueDate = inputTerm.getText().toString().trim();
-        String difficulty = inputDifficulty.getText().toString().trim();
-        String totalPoints = inputTotalPoints.getText().toString().trim();
+        int difficulty = (int) spinnerDifficulty.getSelectedItem();
+        float totalPoints;
+
+        if(selectedAction != null){
+            totalPoints = calculatePoints(selectedAction, area, quantity, difficulty + "");
+        } else {
+            totalPoints = 0;
+        }
 
         // Walidacja
         if (taskName.isEmpty()) {
             Toast.makeText(getContext(), "Podaj nazwę zadania", Toast.LENGTH_SHORT).show();
             return;
         }
+
 
         // WYSYŁANIE W NOWYM WĄTKU
         new Thread(() -> {
@@ -237,8 +257,8 @@ public class AddFragment extends Fragment {
                 data.put("quantity", quantity);
                 data.put("task_time", taskTime);
                 data.put("due_date", dueDate);
-                data.put("difficulty", difficulty);
-                data.put("total_points", totalPoints);
+                data.put("difficulty", difficulty + "");
+                data.put("total_points", totalPoints + "");
 
                 Response response = ApiClient.getInstance(getContext())
                         .post("add_task", data);
@@ -292,7 +312,36 @@ public class AddFragment extends Fragment {
         inputQuantity.setText("");
         inputTaskTime.setText("");
         inputTerm.setText("");
-        inputDifficulty.setText("");
+        spinnerDifficulty.setSelection(0);
         inputTotalPoints.setText("");
     }
+    private float calculatePoints(Action action, String areaStr, String quantityStr, String difficultyStr) {
+
+        float baseMultiplier = action.getMultiplier(); // mnożnik z obiektu Action
+        float value = 0;
+
+        // ilość lub metr kw.
+        if (action.getType().equals("powierzchnia")) {
+            value = areaStr.isEmpty() ? 0 : Float.parseFloat(areaStr);
+        } else if (action.getType().equals("ilosc")) {
+            value = quantityStr.isEmpty() ? 0 : Float.parseFloat(quantityStr);
+        }
+
+        // trudność
+        int diff = difficultyStr.isEmpty() ? 1 : Integer.parseInt(difficultyStr);
+
+        float difficultyMultiplier = 1f;
+
+        switch (diff) {
+            case 1: difficultyMultiplier = 1f; break;
+            case 2: difficultyMultiplier = 1.2f; break;
+            case 3: difficultyMultiplier = 1.5f; break;
+            case 4: difficultyMultiplier = 2.0f; break;
+            case 5: difficultyMultiplier = 3.0f; break;
+        }
+        float points = value * baseMultiplier * difficultyMultiplier *100;
+        inputTotalPoints.setText(points + "");
+        return points;
+    }
+
 }

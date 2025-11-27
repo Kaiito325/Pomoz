@@ -13,4 +13,5 @@
     <string name="action_icon">Ikona czynności</string>
     <string name="searchAction">Szukaj czynności</string>
     <string name="logout">wyloguj</string>
+    <string name="take_task">Przyjmij zadanie</string>
 </resources>

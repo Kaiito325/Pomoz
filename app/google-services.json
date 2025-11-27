@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1025800588516",
+    "project_id": "pomoz-a5c94",
+    "storage_bucket": "pomoz-a5c94.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1025800588516:android:4467581c64ebfe942fb0f1",
+        "android_client_info": {
+          "package_name": "com.example.pomoz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6DwJhbwkvfCkOrthVcTlB9BNFWGuqG48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

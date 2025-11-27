@@ -194,7 +194,9 @@ public class ApiClient {
                             .putString("refresh_token", obj.getString("refresh_token"))
                             .putString("imie", obj.optString("imie"))
                             .putString("rola", obj.optString("rola"))
+                            .putInt("user_id", obj.optInt("user_id"))
                             .apply();
+
                 }
 
                 return obj;
@@ -230,6 +232,7 @@ public class ApiClient {
                             .putString("imie", obj.optString("imie"))
                             .putString("rola", obj.optString("rola"))
                             .putString("miejscowosc", obj.optString("miejscowosc"))
+                            .putInt("user_id", obj.optInt("user_id"))
                             .apply();
                 }
 
@@ -241,6 +244,13 @@ public class ApiClient {
 
         return null;
     }
+    public String getUserName(){
+        return prefs.getString("imie","");
+    }
+    public int getUserId() {
+        return prefs.getInt("user_id", -1);
+    }
+
 
 
     public boolean isLoggedIn() {
@@ -254,6 +264,7 @@ public class ApiClient {
                 .remove("imie")
                 .remove("rola")
                 .remove("miejscowosc")
+                .remove("user_id")
                 .apply();
     }
 }
