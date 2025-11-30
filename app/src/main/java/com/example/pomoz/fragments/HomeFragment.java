@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -134,6 +135,7 @@ public class HomeFragment extends Fragment {
             } catch (Exception e) {
                 requireActivity().runOnUiThread(() -> {
                     Toast.makeText(getContext(), "Błąd połączenia", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "loadTasks: " + e);
                     refresher.setRefreshing(false);
                 });
             }

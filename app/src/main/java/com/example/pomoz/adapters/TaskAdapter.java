@@ -1,8 +1,11 @@
 package com.example.pomoz.adapters;
 
+import android.media.Image;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -30,6 +33,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     public static class TaskViewHolder extends RecyclerView.ViewHolder {
 
         TextView taskName, taskDescription, taskLocation, taskTokens;
+        ImageView taskImg;
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -37,6 +41,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             taskDescription = itemView.findViewById(R.id.taskDesc);
             taskLocation = itemView.findViewById(R.id.taskLoc);
             taskTokens = itemView.findViewById(R.id.taskTokens);
+            taskImg = itemView.findViewById(R.id.imageView);
         }
         public void bind(Task task, OnTaskClickListener listener) {
             itemView.setOnClickListener(v -> listener.onTaskClick(task));
@@ -63,6 +68,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         holder.taskDescription.setText(task.getDescription());
         holder.taskLocation.setText(task.getLocation());
         holder.taskTokens.setText(task.getTokens() + "");
+        holder.taskImg.setImageResource(task.getImgId());
+        Log.d("TAG", "onBindViewHolder: " + task.getImgId());
         holder.bind(task,listener);
     }
 

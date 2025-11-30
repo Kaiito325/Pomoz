@@ -18,7 +18,7 @@ public class Task implements Serializable {
 
     public Task(int id, int userId, int tokens, int actionId, String name, String imgId, String description, String time, String term, String difficulty, String location, Context context) {
         this(name, description, location, tokens);
-        String img = imgId.equals("null")? imgId: "action_icon";
+        String img = imgId.equals("null")? "action_icon": imgId;
         this.imgId = context.getResources().getIdentifier(img, "drawable", context.getPackageName());
         this.id = id;
         this.userId = userId;
@@ -26,6 +26,10 @@ public class Task implements Serializable {
         this.time = time;
         this.term = term;
         this.difficulty = difficulty;
+    }
+
+    public int getImgId() {
+        return imgId;
     }
 
     public int getId() {
