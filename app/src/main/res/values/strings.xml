@@ -15,4 +15,5 @@
     <string name="logout">wyloguj</string>
     <string name="take_task">Przyjmij zadanie</string>
     <string name="send_message">Wyślij wiadomość</string>
+    <string name="warningHeader">Masz nowe powiadomienie</string>
 </resources>

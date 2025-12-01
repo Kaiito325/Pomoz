@@ -1,12 +1,15 @@
 package com.example.pomoz.fragments;
 
 import static android.content.ContentValues.TAG;
+import static android.view.View.VISIBLE;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,16 +19,20 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.work.ListenableWorker;
 
 import com.example.pomoz.R;
 import com.example.pomoz.activities.TaskInfoActivity;
+import com.example.pomoz.adapters.NotificationAdapter;
 import com.example.pomoz.adapters.TaskAdapter;
 import com.example.pomoz.data.db_config.ApiClient;
 import com.example.pomoz.model_classes.Action;
+import com.example.pomoz.model_classes.Notification;
 import com.example.pomoz.model_classes.Task;
 import com.example.pomoz.views.SemiCircleProgressView;
 
@@ -35,7 +42,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Response;
 
@@ -44,6 +53,8 @@ public class HomeFragment extends Fragment {
     private TextView userName;
     private TextView uniquePersons, tasksDone;
     private TextView totalPersons, totalTokens, totalTasks;
+    private RecyclerView messageLayout;
+    private TextView messageHeader, messageContent;
     private RecyclerView availableTasks;
 //    private List<Task> tasks = new ArrayList<>();
     private TaskAdapter taskAdapter;
@@ -61,16 +72,22 @@ public class HomeFragment extends Fragment {
         userName = v.findViewById(R.id.userName);
         userName.setText(ApiClient.getInstance(getContext()).getUserName());
 
+        messageLayout = v.findViewById(R.id.messageInfo);
+
+        messageLayout.setLayoutManager(new LinearLayoutManager(getContext()));
+
+
         SwipeRefreshLayout swipeRefresh = v.findViewById(R.id.swipeRefresh);
 
         swipeRefresh.setOnRefreshListener(() -> {
             loadTasks(swipeRefresh);
+            checkNotifications(swipeRefresh);
         });
 
 
         startStatsAnimation(progressView);
         loadTasks(swipeRefresh);
-
+        checkNotifications(swipeRefresh);
 
         availableTasks.setLayoutManager(new LinearLayoutManager(getContext()));
         taskAdapter = new TaskAdapter(new ArrayList<>(),task -> {
@@ -171,5 +188,60 @@ public class HomeFragment extends Fragment {
         animation.start();
     }
 
+    public void checkNotifications(SwipeRefreshLayout refresher){
+        new Thread(() -> {
+            Context context = getContext();
+            int userId = ApiClient.getInstance(context).getUserId();
 
+            try {
+                Map<String, String> data = new HashMap<>();
+                data.put("user_id", String.valueOf(userId));
+
+                Response response = ApiClient.getInstance(context)
+                        .get("get_notifications", data);
+                Log.d(TAG, "checkNotifications: " + response);
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    String bodyStr = response.body().string();
+                    JSONArray notifications = new JSONArray(bodyStr);
+
+                    Handler main = new Handler(Looper.getMainLooper());
+
+                    main.post(() -> {
+                        messageLayout.setVisibility(VISIBLE);
+                        RecyclerView recycler = requireView().findViewById(R.id.messageInfo);
+                        recycler.setLayoutManager(new LinearLayoutManager(context));
+
+                        List<Notification> list = new ArrayList<>();
+
+                        for (int i = 0; i < notifications.length(); i++) {
+                            try {
+                                JSONObject n = notifications.getJSONObject(i);
+                                Log.d(TAG, "checkNotifications: " + n);
+
+                                list.add(new Notification(
+                                        n.getInt("id"),
+                                        n.getString("title"),
+                                        n.getString("body")
+                                ));
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        recycler.setAdapter(new NotificationAdapter(list));
+
+                        if (refresher != null)
+                            refresher.setRefreshing(false);
+                    });
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }).start();
+    }
 }

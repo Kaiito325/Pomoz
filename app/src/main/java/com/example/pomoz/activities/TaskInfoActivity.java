@@ -35,24 +35,34 @@ public class TaskInfoActivity extends AppCompatActivity {
         takeTaskBtn = findViewById(R.id.takeTaskBtn);
         sendMessageBtn = findViewById(R.id.sendMessage);
         Task task = (Task) getIntent().getSerializableExtra("task");
+        int intentUserId = getIntent().getIntExtra("taskId", -1);
 
-        if (task != null) {
+        if (task != null || intentUserId != -1) {
+            int userID = -1;
             TextView name = findViewById(R.id.taskName);
             TextView desc = findViewById(R.id.taskDesc);
             TextView loc = findViewById(R.id.taskLoc);
             TextView tok = findViewById(R.id.taskTokens);
             TextView userName = findViewById(R.id.userName);
             TextView userId = findViewById(R.id.userId);
+            if (task != null) {
 
-            name.setText(task.getName());
-            desc.setText(task.getDescription());
-            loc.setText(task.getLocation());
-            tok.setText(String.valueOf(task.getTokens()));
 
+                name.setText(task.getName());
+                desc.setText(task.getDescription());
+                loc.setText(task.getLocation());
+                tok.setText(String.valueOf(task.getTokens()));
+                userID = task.getUserId();
+            }else{
+                userID = intentUserId;
+            }
+
+
+            int finalUserID = userID;
             new Thread(() -> {
                 try {
                     Map<String, String> data = new HashMap<>();
-                    data.put("userId", task.getUserId() + "");
+                    data.put("userId", finalUserID + "");
 
                     Response response = ApiClient.getInstance(this).post("get_user_name", data);
 
