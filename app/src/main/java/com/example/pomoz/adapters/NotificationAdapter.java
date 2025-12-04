@@ -38,7 +38,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.message.setText(item.message);
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), TaskInfoActivity.class);
-            intent.putExtra("id", item.id);
+            intent.putExtra("notTask", item);
             v.getContext().startActivity(intent);
         });
     }

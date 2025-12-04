@@ -222,6 +222,7 @@ public class HomeFragment extends Fragment {
 
                                 list.add(new Notification(
                                         n.getInt("id"),
+                                        n.getInt("user_id"),
                                         n.getString("title"),
                                         n.getString("body")
                                 ));
